@@ -2,8 +2,10 @@ import {Component, OnDestroy} from "@angular/core";
 import {NgForm} from "@angular/forms";
 import {Router} from "@angular/router";
 import {AuthService} from "../services/auth.service";
-import {IUserAuthenticate} from "../models/dto/login";
 import {Subscription} from "rxjs";
+import {IUserAuthenticate} from "../models/Dto/User/IUserAuthenticate";
+import {MessageService} from "../services/message.service";
+import {HttpClient} from "@angular/common/http";
 
 
 @Component({
@@ -30,6 +32,8 @@ import {Subscription} from "rxjs";
                                                                                       [(ngModel)]="loginForm.Password">
           </div>
           <button type="submit" [disabled]="f.invalid">Enviar</button>
+          <button type="button" (click)="printConnState()">Conn state</button>
+          <button type="button" (click)="testSignalr()">Test</button>
         </form>
       </div>
     </div>
@@ -39,19 +43,31 @@ export class LandingComponent implements OnDestroy {
   loginForm: IUserAuthenticate = {Phone: '', Password: ''};
   loginSubscription: Subscription | undefined;
 
-  constructor(private auth: AuthService, private router: Router) {
+  constructor(private auth: AuthService, private router: Router,
+              private http: HttpClient, public messageService: MessageService) {
   }
 
   ngOnDestroy(): void {
     this.loginSubscription?.unsubscribe();
   }
 
-  async onSubmit(f: NgForm) {
+  printConnState(): void {
+    console.log(this.messageService.isConnected() ? "Connected" : "Disconnected");
+  }
 
-    if (f.invalid || f.pristine || f.untouched) return;
-    console.log("asdasdasd");
+  testSignalr(): void {
+    this.http.get("api/auth/test").subscribe(res => {
+      console.log(res);
+    });
+  }
+
+  async onSubmit(f: NgForm) {
+    if (f.invalid && (f.touched || f.pristine)) return;
+
     this.loginSubscription = await this.auth.login(this.loginForm).subscribe(async res => {
       this.auth.saveTokens(res);
+
+      await this.messageService.newSession(res.IdToken);
 
       await this.router.navigate(['chat']);
     });

@@ -1,3 +1,5 @@
+@import "../variables"
+
 .chat
   &__wrapper
     width: 100%
@@ -23,6 +25,8 @@
       display: flex
       flex-direction: column
       background-color: white
+      min-width: 10rem
+      max-width: 20rem
 
       .toolbar
         height: 3rem
@@ -30,26 +34,24 @@
         display: flex
         flex-direction: row
         justify-content: space-between
+        align-items: center
         background-color: #ededed
         border-bottom: 1px solid #dcdcdc
 
         .avatar
-          padding: 0
-          border-radius: 50%
-          width: auto
-          aspect-ratio: 1/1
-          background-color: orange
-          display: flex
-          justify-content: center
-          align-items: center
-          font-size: 1.2rem
-          color: white
-          font-weight: bold
+          height: 80%
+
+      .rows-container
+        width: 100%
+        height: 100%
+        overflow-y: auto
 
     .chat
+      box-sizing: border-box
+      border-left: 1px solid #dcdcdc
+      border-bottom: 0.5em solid $logo-bg
       flex: 2
-      background-color: green
-
+      background-color: white
 
 @media only screen and (max-width: 80rem)
   .chat__window

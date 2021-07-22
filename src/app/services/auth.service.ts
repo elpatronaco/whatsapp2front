@@ -1,8 +1,8 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {IUserAuthenticate} from "../models/dto/login";
-import {ITokens} from "../models/dto/tokens";
 import {Observable} from "rxjs";
+import {ITokens} from "../models/Dto/Auth/ITokens";
+import {IUserAuthenticate} from "../models/Dto/User/IUserAuthenticate";
 
 
 @Injectable({providedIn: "root"})
@@ -23,7 +23,6 @@ export class AuthService {
   }
 
   login(payload: IUserAuthenticate): Observable<ITokens> {
-    console.log("login")
     return this.http.post<ITokens>("api/auth/login", payload);
   }
 }

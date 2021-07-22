@@ -19,6 +19,10 @@ export class HttpClientInterceptor implements HttpInterceptor {
       clonedRequest.headers.set("Authorization", `Bearer ${tokens.IdToken}`);
     }
 
+    if (!req.headers.has("Content-Type")) {
+      clonedRequest.headers.set("Content-Type", "application/json");
+    }
+
     return next.handle(clonedRequest);
   }
 }
