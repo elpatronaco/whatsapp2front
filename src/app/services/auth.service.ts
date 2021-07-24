@@ -10,16 +10,16 @@ export class AuthService {
   constructor(private http: HttpClient) {
   }
 
-  saveTokens({AccessToken, IdToken}: ITokens) {
-    sessionStorage.setItem("idToken", IdToken);
-    sessionStorage.setItem("accessToken", AccessToken);
+  saveTokens({accessToken, idToken}: ITokens) {
+    sessionStorage.setItem("idToken", idToken);
+    sessionStorage.setItem("accessToken", accessToken);
   }
 
   getTokens(): ITokens | null {
     const idToken = sessionStorage.getItem("idToken");
     const accessToken = sessionStorage.getItem("accessToken");
 
-    return idToken && accessToken ? {AccessToken: accessToken, IdToken: idToken} : null;
+    return idToken && accessToken ? {accessToken, idToken} : null;
   }
 
   login(payload: IUserAuthenticate): Observable<ITokens> {

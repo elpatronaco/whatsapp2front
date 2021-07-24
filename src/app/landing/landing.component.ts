@@ -1,4 +1,4 @@
-import {Component, OnDestroy} from "@angular/core";
+import {Component, OnDestroy, OnInit} from "@angular/core";
 import {NgForm} from "@angular/forms";
 import {Router} from "@angular/router";
 import {AuthService} from "../services/auth.service";
@@ -33,18 +33,21 @@ import {HttpClient} from "@angular/common/http";
           </div>
           <button type="submit" [disabled]="f.invalid">Enviar</button>
           <button type="button" (click)="printConnState()">Conn state</button>
-          <button type="button" (click)="testSignalr()">Test</button>
         </form>
       </div>
     </div>
   `
 })
-export class LandingComponent implements OnDestroy {
+export class LandingComponent implements OnInit, OnDestroy {
   loginForm: IUserAuthenticate = {Phone: '', Password: ''};
   loginSubscription: Subscription | undefined;
 
   constructor(private auth: AuthService, private router: Router,
               private http: HttpClient, public messageService: MessageService) {
+  }
+
+  async ngOnInit() {
+    await this.messageService.init();
   }
 
   ngOnDestroy(): void {
@@ -55,19 +58,13 @@ export class LandingComponent implements OnDestroy {
     console.log(this.messageService.isConnected() ? "Connected" : "Disconnected");
   }
 
-  testSignalr(): void {
-    this.http.get("api/auth/test").subscribe(res => {
-      console.log(res);
-    });
-  }
-
   async onSubmit(f: NgForm) {
     if (f.invalid && (f.touched || f.pristine)) return;
 
     this.loginSubscription = await this.auth.login(this.loginForm).subscribe(async res => {
       this.auth.saveTokens(res);
 
-      await this.messageService.newSession(res.IdToken);
+      await this.messageService.newSession(res.idToken);
 
       await this.router.navigate(['chat']);
     });

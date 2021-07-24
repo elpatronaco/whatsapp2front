@@ -16,7 +16,7 @@ export class HttpClientInterceptor implements HttpInterceptor {
     const tokens = this.auth.getTokens();
 
     if (tokens) {
-      clonedRequest.headers.set("Authorization", `Bearer ${tokens.IdToken}`);
+      clonedRequest.headers.set("Authorization", `Bearer ${tokens.idToken}`);
     }
 
     if (!req.headers.has("Content-Type")) {

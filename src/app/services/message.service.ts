@@ -1,31 +1,22 @@
 import {Injectable} from '@angular/core';
-import {HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel, Subject} from '@microsoft/signalr';
+import {HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel} from '@microsoft/signalr';
 import {environment} from "../../environments/environment";
 import {IMessage} from "../models/Dto/Message/IMessage";
 import {IOpenChat} from "../models/Dto/Chat/IOpenChat";
+import {IUser} from "../models/Dto/User/IUser";
+import {Subject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageService {
   private _hubConnection: HubConnection | undefined;
-  private _hubEndpoint: string;
 
   public ConnectedSubj = new Subject<boolean>();
+  public OpenChatsSubj = new Subject<IOpenChat[]>();
 
-  constructor() {
-    this._hubEndpoint = `${environment.backendUrl}/hub`;
-    this.init();
-  }
-
-  public async createServer(): Promise<void> {
-    console.log("starting connection");
-
-    this.registerServerEvents();
-  }
-
-  private async init() {
-    this._hubConnection = new HubConnectionBuilder().withUrl("https://localhost:5001/hub")
+  public async init() {
+    this._hubConnection = new HubConnectionBuilder().withUrl(`${environment.backendUrl}/hub`)
       .configureLogging(LogLevel.Information).withAutomaticReconnect()
       .build();
 
@@ -47,17 +38,22 @@ export class MessageService {
   }
 
   private registerServerEvents(): void {
-    if (!this._hubConnection || this._hubConnection.state !== "Connected")
+    if (!this.isConnected())
       return console.error("Can't register server events cause connection not started");
 
-    this._hubConnection.on("chats", (chats: IOpenChat[]) => {
-      console.log("open chats");
-      console.log(chats);
+    this._hubConnection?.on("Chats", (chats: IOpenChat[]) => {
+      console.log("event: ", chats);
+      this.OpenChatsSubj.next(chats);
+    })
+
+    this._hubConnection?.on("Messages", (messages: IMessage[]) => {
+      console.log("messages received");
+      console.log(messages);
     })
   }
 
   public isConnected(): boolean {
-    return this._hubConnection ? this._hubConnection?.state === "Connected" : false;
+    return this._hubConnection ? this._hubConnection.state === "Connected" : false;
   }
 
   public async newSession(idToken: string): Promise<void> {
@@ -66,5 +62,9 @@ export class MessageService {
 
   public async sendMessage(message: IMessage): Promise<void> {
     await this._hubConnection?.invoke("message", message);
+  }
+
+  public async openChat(recipient: IUser) {
+    await this._hubConnection?.invoke("OpenChat", recipient.Id);
   }
 }
