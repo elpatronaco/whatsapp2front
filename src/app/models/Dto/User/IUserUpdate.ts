@@ -1,4 +1,4 @@
 export interface IUserUpdate {
-    Username: string
-    Password: string
+    username: string
+    password: string
 }

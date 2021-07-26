@@ -1,4 +1,4 @@
 export interface AccessTokenPayload {
-  Phone: string
-  Username: string
+  phone: string
+  username: string
 }

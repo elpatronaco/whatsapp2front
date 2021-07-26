@@ -1,4 +1,4 @@
 export interface IUserAuthenticate {
-    Phone: string
-    Password: string
+    phone: string
+    password: string
 }

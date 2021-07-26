@@ -1,3 +1,3 @@
 export interface IdTokenPayload {
-  Id: string
+  id: string
 }

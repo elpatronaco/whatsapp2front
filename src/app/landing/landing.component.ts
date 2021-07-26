@@ -5,7 +5,6 @@ import {AuthService} from "../services/auth.service";
 import {Subscription} from "rxjs";
 import {IUserAuthenticate} from "../models/Dto/User/IUserAuthenticate";
 import {MessageService} from "../services/message.service";
-import {HttpClient} from "@angular/common/http";
 
 
 @Component({
@@ -23,39 +22,29 @@ import {HttpClient} from "@angular/common/http";
           <div class="form-group"><label for="phoneInput">Teléfono</label><input id="phoneInput" name="phone"
                                                                                  type="tel"
                                                                                  required
-                                                                                 [(ngModel)]="loginForm.Phone">
+                                                                                 [(ngModel)]="loginForm.phone">
           </div>
           <div class="form-group"><label for="passwordInput">Contraseña</label><input id="passwordInput"
                                                                                       name="password"
                                                                                       type="password" required
                                                                                       minlength="8"
-                                                                                      [(ngModel)]="loginForm.Password">
+                                                                                      [(ngModel)]="loginForm.password">
           </div>
           <button type="submit" [disabled]="f.invalid">Enviar</button>
-          <button type="button" (click)="printConnState()">Conn state</button>
         </form>
       </div>
     </div>
   `
 })
-export class LandingComponent implements OnInit, OnDestroy {
-  loginForm: IUserAuthenticate = {Phone: '', Password: ''};
+export class LandingComponent implements OnDestroy {
+  loginForm: IUserAuthenticate = {phone: '', password: ''};
   loginSubscription: Subscription | undefined;
 
-  constructor(private auth: AuthService, private router: Router,
-              private http: HttpClient, public messageService: MessageService) {
-  }
-
-  async ngOnInit() {
-    await this.messageService.init();
+  constructor(private auth: AuthService, private router: Router, private messageService: MessageService) {
   }
 
   ngOnDestroy(): void {
     this.loginSubscription?.unsubscribe();
-  }
-
-  printConnState(): void {
-    console.log(this.messageService.isConnected() ? "Connected" : "Disconnected");
   }
 
   async onSubmit(f: NgForm) {

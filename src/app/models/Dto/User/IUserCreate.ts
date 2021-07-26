@@ -1,5 +1,5 @@
 export interface IUserCreate {
-    Phone: string
-    Username: string
-    Password: string
+    phone: string
+    username: string
+    password: string
 }

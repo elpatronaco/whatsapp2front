@@ -1,9 +1,8 @@
 import {IUser} from "../User/IUser";
 
 export interface IMessage {
-    Id: string
-    Sender: IUser
-    Recipient: IUser
-    Content: string
-    SentDate: Date
+  id: string
+  amISender: boolean
+  content: string
+  sentDate: Date
 }
