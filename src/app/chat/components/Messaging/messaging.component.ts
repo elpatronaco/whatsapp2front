@@ -44,7 +44,6 @@ export class MessagingComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.messagesSubscription = this.store.select(getMessages).subscribe(messages => {
       this.messages = messages;
-      console.log(messages);
     })
   }
 

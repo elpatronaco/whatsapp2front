@@ -33,7 +33,21 @@ const globalReducer = createReducer(initialState,
   on(SetChatRecipient, (state, action) => ({...state, recipient: action})),
   on(SetChats, (state, action) => ({...state, chats: action.chats})),
   on(SetMessages, (state, action) => ({...state, messages: action.messages})),
-  on(AddMessage, (state, action) => ({...state, messages: [...state.messages, action]}))
+  on(AddMessage, (state, action) => {
+    const messages = state.messages.slice();
+    const chats = state.chats.slice();
+
+    if (state.recipient && action.recipientId === state.recipient.id) {
+      messages.push(action);
+    }
+
+    const recipientIndex = chats.findIndex(x => x.recipient.id === action.recipientId);
+
+    if (recipientIndex !== -1)
+      chats[recipientIndex] = {...chats[recipientIndex], lastMessage: action};
+
+    return {...state, chats, messages};
+  })
 )
 
 export function reducer(state: IGlobalState | undefined, action: Action) {
