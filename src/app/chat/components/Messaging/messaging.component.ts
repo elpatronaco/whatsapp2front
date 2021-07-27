@@ -1,11 +1,20 @@
-import {Component, Input, OnInit} from "@angular/core";
+import {Component, Input, OnDestroy, OnInit} from "@angular/core";
 import {IMessage} from "../../../models/Dto/Message/IMessage";
 import {MessageService} from "../../../services/message.service";
+import {Subscription} from "rxjs";
+import {Store} from "@ngrx/store";
+import {IState} from "../../../store/state.module";
+import {getMessages} from "src/app/store/global/global.selectors";
+import {IUser} from "../../../models/Dto/User/IUser";
 
 
 @Component({
   selector: "app-messaging", styleUrls: ["./messaging.component.sass"], template: `
     <div class="chat__wrapper">
+      <header>
+        <img src="assets/userplaceholder.svg" class="avatar">
+        <p>{{recipient.username}}</p>
+      </header>
       <div class="chat__message__wrapper">
         <div *ngFor="let message of messages" class="chat__message"
              [ngClass]="message.amISender ? 'sender' : 'recipient'"
@@ -23,27 +32,30 @@ import {MessageService} from "../../../services/message.service";
     </div>
   `
 })
-export class MessagingComponent implements OnInit {
+export class MessagingComponent implements OnInit, OnDestroy {
+  @Input("recipientUser") recipient: IUser;
   public messages: IMessage[] = [];
   public message: string = "";
+  private messagesSubscription: Subscription;
 
-  constructor(private messageService: MessageService) {
+  constructor(private messageService: MessageService, private store: Store<IState>) {
   }
 
   ngOnInit() {
-    this.messageService.MessagesSubj.subscribe(x => {
-      this.messages = x;
+    this.messagesSubscription = this.store.select(getMessages).subscribe(messages => {
+      this.messages = messages;
+      console.log(messages);
     })
+  }
 
-    this.messageService.NewMessageSubj.subscribe(x => {
-      this.messages.push(x);
-    })
+  ngOnDestroy() {
+    this.messagesSubscription.unsubscribe();
   }
 
   async sendMessage() {
     if (!this.message.length) return;
 
-    await this.messageService.sendMessage(this.message, "54ff6201-fe6d-4dae-88dd-8fa99e613f3c");
+    await this.messageService.sendMessage(this.message, this.recipient.id);
     this.message = "";
   }
 }

@@ -6,12 +6,16 @@ import {IOpenChat} from "../models/Dto/Chat/IOpenChat";
 import {IUser} from "../models/Dto/User/IUser";
 import {BehaviorSubject, Subject} from "rxjs";
 import {AuthService} from "./auth.service";
+import {ITokens} from "../models/Dto/Auth/ITokens";
+import {Store} from "@ngrx/store";
+import {IState} from '../store/state.module';
+import {AddMessage, SetChats, SetMessages} from "../store/global/global.actions";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MessageService {
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService, private store: Store<IState>) {
   }
 
   private _hubConnection: HubConnection | undefined;
@@ -21,7 +25,7 @@ export class MessageService {
   public MessagesSubj = new BehaviorSubject<IMessage[]>([]);
   public NewMessageSubj = new Subject<IMessage>();
 
-  public async init() {
+  public async init(tokens: ITokens) {
     this._hubConnection = new HubConnectionBuilder().withUrl(`${environment.backendUrl}/hub`)
       .configureLogging(LogLevel.Information).withAutomaticReconnect()
       .build();
@@ -33,9 +37,7 @@ export class MessageService {
     this.ConnectedSubj.next(this.isConnected());
 
     if (this.isConnected()) {
-      const tokens = this.authService.getTokens();
-
-      if (tokens) await this.newSession(tokens.idToken);
+      await this.newSession(tokens.idToken);
     }
   }
 
@@ -50,20 +52,32 @@ export class MessageService {
   }
 
   private registerServerEvents(): void {
-    if (!this.isConnected())
+    if (!this._hubConnection || !this.isConnected())
       return console.error("Can't register server events cause connection not started");
 
-    this._hubConnection?.on("Chats", (chats: IOpenChat[]) => {
-      this.OpenChatsSubj.next(chats);
+    this._hubConnection.on("Chats", (chats: IOpenChat[]) => {
+      this.store.dispatch(SetChats({chats}));
     });
 
-    this._hubConnection?.on("Messages", (messages: IMessage[]) => {
-      this.MessagesSubj.next(messages);
+    this._hubConnection.on("Messages", (messages: IMessage[]) => {
+      this.store.dispatch(SetMessages({messages}));
     });
 
-    this._hubConnection?.on("New Message", (newMessage: IMessage) => {
-      this.NewMessageSubj.next(newMessage);
+    this._hubConnection.on("New Message", (newMessage: IMessage) => {
+      this.store.dispatch(AddMessage(newMessage));
     });
+
+    this._hubConnection.onclose(() => {
+      this.ConnectedSubj.next(false);
+    })
+
+    this._hubConnection.onreconnecting(() => {
+      this.ConnectedSubj.next(this.isConnected());
+    })
+
+    this._hubConnection.onreconnected(() => {
+      this.ConnectedSubj.next(this.isConnected());
+    })
   }
 
   public isConnected(): boolean {

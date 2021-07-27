@@ -5,6 +5,10 @@ import {Subscription} from "rxjs";
 import {UserService} from "../services/user.service";
 import {IUser} from "../models/Dto/User/IUser";
 import {AuthService} from "../services/auth.service";
+import {Store} from "@ngrx/store";
+import {IState} from "../store/state.module";
+import {ValidateUserRequest} from "../store/global/global.actions";
+import {getOpenChats, getRecipient} from "../store/global/global.selectors";
 
 @Component({
   selector: "app-chat", styleUrls: ["./chat.component.sass"], template: `
@@ -19,51 +23,54 @@ import {AuthService} from "../services/auth.service";
               </div>
             </header>
             <div class="new-contact__window">
-              <app-chat-row *ngFor="let user of allUsers" [openchat]="{recipient: user}"></app-chat-row>
+              <app-chat-row *ngFor="let user of allUsers" [openChat]="{recipient: user}"></app-chat-row>
             </div>
           </div>
           <div class="toolbar">
-            <span class="avatar">PC</span>
+            <img src="assets/userplaceholder.svg" class="avatar">
           </div>
           <div class="rows__wrapper">
-            <app-chat-row *ngFor="let chat of chats" [openchat]="chat"></app-chat-row>
+            <app-chat-row *ngFor="let chat of chats" [openChat]="chat"></app-chat-row>
             <span class="new-chat-button" (click)="openNewContactMenu()" *ngIf="!openMenu">+</span>
           </div>
         </div>
-        <div class="chat__wrapper" [class.bordered]="!openedChat">
-          <app-messaging *ngIf="openedChat"></app-messaging>
+        <div class="chat__wrapper" [class.bordered]="!recipientUser">
+          <app-messaging *ngIf="!!recipientUser" [recipientUser]="recipientUser"></app-messaging>
         </div>
       </div>
     </div>
   `
 })
 export class ChatComponent implements OnInit, OnDestroy {
-  public chats: IOpenChat[] = [];
-  public allUsers: IUser[] = [];
-  public openMenu = false;
-  public openedChat = false;
-  private openChatsSubscription: Subscription | undefined;
-
-  constructor(private authService: AuthService, private messageService: MessageService, private userService: UserService) {
+  constructor(private authService: AuthService, private messageService: MessageService,
+              private userService: UserService, private store: Store<IState>) {
   }
 
+  public chats: IOpenChat[] = [];
+  public allUsers: IUser[] = [];
+  public recipientUser: IUser | null = null;
+  public openMenu = false;
+  private subscriptions: Subscription[] = [];
+
   async ngOnInit() {
-    this.openChatsSubscription = this.messageService.OpenChatsSubj.subscribe(value => {
-      this.chats = value;
-    })
+    this.store.dispatch(ValidateUserRequest());
 
-    this.messageService.MessagesSubj.subscribe(value => {
-      if (value.length)
-        this.openedChat = true;
-    })
+    this.subscriptions.push(
+      this.store.select(getOpenChats).subscribe(chats => {
+        this.chats = chats;
+      })
+    );
 
-    const tokens = this.authService.getTokens();
-
-    if (tokens) await this.messageService.newSession(tokens.idToken);
+    this.subscriptions.push(
+      this.store.select(getRecipient).subscribe(user => {
+        this.recipientUser = user;
+        if (this.openMenu) this.openMenu = false;
+      })
+    );
   }
 
   ngOnDestroy() {
-    this.openChatsSubscription?.unsubscribe();
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   openNewContactMenu() {

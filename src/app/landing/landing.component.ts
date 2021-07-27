@@ -1,10 +1,10 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {Component, OnDestroy} from "@angular/core";
 import {NgForm} from "@angular/forms";
-import {Router} from "@angular/router";
-import {AuthService} from "../services/auth.service";
-import {Subscription} from "rxjs";
+import {Observable, Subscription} from "rxjs";
 import {IUserAuthenticate} from "../models/Dto/User/IUserAuthenticate";
-import {MessageService} from "../services/message.service";
+import {LoginRequest} from "../store/global/global.actions";
+import {IAccessTokenPayload} from "../models/Dto/Auth/IAccessTokenPayload";
+import {Store} from "@ngrx/store";
 
 
 @Component({
@@ -40,7 +40,7 @@ export class LandingComponent implements OnDestroy {
   loginForm: IUserAuthenticate = {phone: '', password: ''};
   loginSubscription: Subscription | undefined;
 
-  constructor(private auth: AuthService, private router: Router, private messageService: MessageService) {
+  constructor(private store: Store) {
   }
 
   ngOnDestroy(): void {
@@ -50,12 +50,6 @@ export class LandingComponent implements OnDestroy {
   async onSubmit(f: NgForm) {
     if (f.invalid && (f.touched || f.pristine)) return;
 
-    this.loginSubscription = await this.auth.login(this.loginForm).subscribe(async res => {
-      this.auth.saveTokens(res);
-
-      await this.messageService.newSession(res.idToken);
-
-      await this.router.navigate(['chat']);
-    });
+    this.store.dispatch(LoginRequest(this.loginForm));
   }
 }
