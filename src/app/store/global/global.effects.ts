@@ -47,12 +47,14 @@ export class GlobalEffects {
         const tokens = this.authService.getTokens();
 
         if (!tokens) {
-          await this.router.navigate([""]);
+          await this.router.navigate([]);
 
           return ValidateUserFailure();
         }
 
         await this.messageService.init(tokens);
+
+        await this.router.navigate(["chat"]);
 
         const accessTokenPayload = decodeJwt<IAccessTokenPayload>(tokens.accessToken);
 

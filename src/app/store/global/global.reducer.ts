@@ -39,6 +39,11 @@ const globalReducer = createReducer(initialState,
 
     if (state.recipient && action.recipientId === state.recipient.id) {
       messages.push(action);
+
+      const audio = new Audio();
+      audio.src = `../../../assets/${action.amISender ? "in" : "out"}_sound.mp3`;
+      audio.load();
+      audio.play();
     }
 
     const recipientIndex = chats.findIndex(x => x.recipient.id === action.recipientId);

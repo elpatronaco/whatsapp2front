@@ -47,28 +47,32 @@
 
   &__message__wrapper
     background-image: url('../../../../assets/chatbg.jpg')
-    background-size: cover
-    display: flex
-    flex-direction: column
-    justify-content: flex-end
-    padding: 1rem 10% 1rem 10%
-    gap: 2px
+    background-size: contain
     overflow-x: hidden
     overflow-y: scroll
     flex: 20
+    position: relative
+    padding: 1rem 10% 1rem 10%
+
+    div
+      display: flex
+      flex-direction: column
+      gap: 2px
+      padding: 0
+
 
   &__message
     display: flex
     flex-direction: row
 
     &.sender
-      justify-content: flex-end
+      align-items: flex-end
 
       div
         background-color: #dcf8c6
 
     &.recipient
-      justify-content: flex-start
+      align-items: flex-start
 
       div
         background-color: #ffffff
@@ -76,6 +80,6 @@
     div
       border-radius: 0.5rem
       padding: 0.5rem
-      box-shadow: 0 1px .5px rgba(var(--shadow-rgb), .13)
+      box-shadow: 0 1px .5px rgba(gray, .13)
       word-break: break-word
       max-width: 60%

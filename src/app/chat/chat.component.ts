@@ -7,7 +7,6 @@ import {IUser} from "../models/Dto/User/IUser";
 import {AuthService} from "../services/auth.service";
 import {Store} from "@ngrx/store";
 import {IState} from "../store/state.module";
-import {ValidateUserRequest} from "../store/global/global.actions";
 import {getOpenChats, getRecipient} from "../store/global/global.selectors";
 
 @Component({
@@ -53,8 +52,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
 
   async ngOnInit() {
-    this.store.dispatch(ValidateUserRequest());
-
     this.subscriptions.push(
       this.store.select(getOpenChats).subscribe(chats => {
         this.chats = chats;

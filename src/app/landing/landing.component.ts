@@ -1,9 +1,8 @@
 import {Component, OnDestroy} from "@angular/core";
 import {NgForm} from "@angular/forms";
-import {Observable, Subscription} from "rxjs";
+import {Subscription} from "rxjs";
 import {IUserAuthenticate} from "../models/Dto/User/IUserAuthenticate";
 import {LoginRequest} from "../store/global/global.actions";
-import {IAccessTokenPayload} from "../models/Dto/Auth/IAccessTokenPayload";
 import {Store} from "@ngrx/store";
 
 
@@ -12,27 +11,29 @@ import {Store} from "@ngrx/store";
   styleUrls: ["./landing.component.sass"],
   template: `
     <div class="landing__wrapper">
-      <div class="landing__header">
+      <header class="landing__header">
         <img class="icon" src="assets/icon.svg" alt="whatsapp 2 logo">
         <p>WHATSAPP 2 WEB</p>
-      </div>
-      <div class="landing__window">
+      </header>
+      <section class="landing__window">
         <h3>Inicia sesión</h3>
         <form class="login-form" #f="ngForm" (ngSubmit)="onSubmit(f)">
           <div class="form-group"><label for="phoneInput">Teléfono</label><input id="phoneInput" name="phone"
                                                                                  type="tel"
                                                                                  required
+                                                                                 tabindex="1"
                                                                                  [(ngModel)]="loginForm.phone">
           </div>
           <div class="form-group"><label for="passwordInput">Contraseña</label><input id="passwordInput"
                                                                                       name="password"
                                                                                       type="password" required
                                                                                       minlength="8"
+                                                                                      tabindex="2"
                                                                                       [(ngModel)]="loginForm.password">
           </div>
-          <button type="submit" [disabled]="f.invalid">Enviar</button>
+          <button type="submit" [disabled]="f.invalid" tabindex="3">Enviar</button>
         </form>
-      </div>
+      </section>
     </div>
   `
 })

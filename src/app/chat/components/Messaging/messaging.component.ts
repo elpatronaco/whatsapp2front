@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from "@angular/core";
+import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {IMessage} from "../../../models/Dto/Message/IMessage";
 import {MessageService} from "../../../services/message.service";
 import {Subscription} from "rxjs";
@@ -15,13 +15,15 @@ import {IUser} from "../../../models/Dto/User/IUser";
         <img src="assets/userplaceholder.svg" class="avatar">
         <p>{{recipient.username}}</p>
       </header>
-      <div class="chat__message__wrapper">
-        <div *ngFor="let message of messages" class="chat__message"
-             [ngClass]="message.amISender ? 'sender' : 'recipient'"
-        >
-          <div>{{message.content}}</div>
+      <section class="chat__message__wrapper" #messagesWrapper>
+        <div>
+          <div *ngFor="let message of messages" class="chat__message"
+               [ngClass]="message.amISender ? 'sender' : 'recipient'"
+          >
+            <div>{{message.content}}</div>
+          </div>
         </div>
-      </div>
+      </section>
       <div class="bottom-row">
         <input id="messageInput" placeholder="Escribe un mensaje aquí" [(ngModel)]="message"
                (keyup.enter)="sendMessage()">
@@ -34,6 +36,8 @@ import {IUser} from "../../../models/Dto/User/IUser";
 })
 export class MessagingComponent implements OnInit, OnDestroy {
   @Input("recipientUser") recipient: IUser;
+  @ViewChild("messagesWrapper") messagesWrapper: ElementRef;
+
   public messages: IMessage[] = [];
   public message: string = "";
   private messagesSubscription: Subscription;
@@ -44,6 +48,9 @@ export class MessagingComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.messagesSubscription = this.store.select(getMessages).subscribe(messages => {
       this.messages = messages;
+      setTimeout(() => {
+        this.messagesWrapper.nativeElement.scrollTop = this.messagesWrapper.nativeElement.scrollHeight;
+      }, 1);
     })
   }
 
@@ -54,7 +61,7 @@ export class MessagingComponent implements OnInit, OnDestroy {
   async sendMessage() {
     if (!this.message.length) return;
 
-    await this.messageService.sendMessage(this.message, this.recipient.id);
+    await this.messageService.sendMessage(this.message.trim(), this.recipient.id);
     this.message = "";
   }
 }
