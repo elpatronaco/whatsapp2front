@@ -49,7 +49,7 @@ import { Store } from '@ngrx/store';
         <div>
           Made with <span>&hearts;</span> by
           <a href="https://github.com/elpatronaco" target="_blank"
-            >Pau Colomé</a
+            >elpatronaco</a
           >
         </div>
       </footer>
